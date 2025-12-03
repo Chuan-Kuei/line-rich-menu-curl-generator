@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE Rich Menu Curl 指令產生器 | 免費線上工具</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="免費線上 LINE Rich Menu Curl 指令產生器。無需寫程式，透過視覺化介面設計 Rich Menu，自動產生可執行的 curl 指令。支援多區域點擊、子頁面切換、訊息發送等功能。">
+    <meta name="keywords" content="LINE Rich Menu, curl 指令, Rich Menu 產生器, LINE Bot, LINE API, Rich Menu Creator, 免費工具, 線上工具">
+    <meta name="author" content="Cheers Studio">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="LINE Rich Menu Curl 指令產生器 | 免費線上工具">
+    <meta property="og:description" content="免費線上 LINE Rich Menu Curl 指令產生器。無需寫程式，透過視覺化介面設計 Rich Menu，自動產生可執行的 curl 指令。">
+    <meta property="og:site_name" content="LINE Rich Menu Creator">
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LINE Rich Menu Curl 指令產生器 | 免費線上工具">
+    <meta name="twitter:description" content="免費線上 LINE Rich Menu Curl 指令產生器。無需寫程式，透過視覺化介面設計 Rich Menu，自動產生可執行的 curl 指令。">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://tools.cheers.tw/rich-menu-creator/demo/">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LINE Rich Menu Creator</h1>
+            <p class="demo-subtitle">Curl 指令產生器 (Demo 模式)</p>
+            <nav>
+                <button id="nav-list" class="nav-btn active">Rich Menu 列表</button>
+                <button id="nav-alias" class="nav-btn">子頁面設定</button>
+                <button id="generate-curl-btn" class="nav-btn nav-btn-curl" title="產生 Curl 指令">📋 產生 Curl</button>
+            </nav>
+        </header>
+
+        <!-- List Page -->
+        <section id="list-page" class="page active">
+            <div class="page-header">
+                <h2>Rich Menu 列表 (Demo)</h2>
+                <div class="page-header-actions">
+                    <button id="create-richmenu-btn" class="btn-primary">建立 Rich Menu</button>
+                </div>
+            </div>
+            <div id="rich-menu-list" class="rich-menu-list">
+                <p class="demo-info">
+                    這是 Demo 模式，不會實際呼叫 LINE API。<br>
+                    您可以：<br>
+                    1. 建立 Rich Menu 設定<br>
+                    2. 設定子頁面 (Alias)<br>
+                    3. 點擊「產生 Curl」按鈕來產生可執行的 curl 指令
+                </p>
+            </div>
+        </section>
+
+        <!-- Alias Management Page -->
+        <section id="alias-page" class="page">
+            <div class="page-header">
+                <h2>子頁面設定 (Rich Menu Alias)</h2>
+                <button id="create-alias-btn" class="btn-primary">建立子頁面</button>
+            </div>
+            <div id="alias-list" class="alias-list">
+                <p class="demo-info">尚未設定任何子頁面別名</p>
+            </div>
+        </section>
+
+        <!-- Create Page -->
+        <section id="create-page" class="page">
+            <div class="page-header">
+                <h2>建立 Rich Menu</h2>
+            </div>
+            <form id="create-form">
+                <!-- Image Upload -->
+                <div class="form-group">
+                    <label for="image-upload">上傳圖片 *</label>
+                    <p class="form-hint">格式: JPEG 或 PNG，大小: 最大 1MB<br>
+                    寬度: 800-2500px，高度: 最小 250px，長寬比: 最小 1.45</p>
+                    <input type="file" id="image-upload" accept="image/jpeg,image/png" required>
+                    <div id="image-validation" class="validation-message"></div>
+                </div>
+
+                <!-- Image Preview and Area Selection -->
+                <div class="form-group" id="preview-section" style="display: none;">
+                    <label>圖片預覽與區域選擇</label>
+                    <p class="form-hint">在圖片上按住滑鼠拖曳來建立可點擊區域</p>
+                    <div id="preview-container" class="preview-container">
+                        <canvas id="preview-canvas"></canvas>
+                    </div>
+                    <div id="image-info" class="image-info"></div>
+                </div>
+
+                <!-- Areas List -->
+                <div class="form-group" id="areas-section" style="display: none;">
+                    <label>已定義的區域</label>
+                    <div id="areas-list" class="areas-list"></div>
+                </div>
+
+                <!-- Name Field -->
+                <div class="form-group">
+                    <label for="menu-name">名稱 *</label>
+                    <p class="form-hint">管理員識別用，最多 300 字</p>
+                    <input type="text" id="menu-name" maxlength="300" required>
+                    <div class="char-count"><span id="name-count">0</span>/300</div>
+                </div>
+
+                <!-- Chat Bar Text -->
+                <div class="form-group">
+                    <label for="chat-bar-text">聊天列文字 *</label>
+                    <p class="form-hint">顯示在聊天列上，最多 14 字</p>
+                    <input type="text" id="chat-bar-text" maxlength="14" required>
+                    <div class="char-count"><span id="chat-count">0</span>/14</div>
+                </div>
+
+                <!-- Submit Buttons -->
+                <div class="form-actions">
+                    <button type="button" id="cancel-create" class="btn-secondary">取消</button>
+                    <button type="submit" id="submit-create" class="btn-primary">新增到列表</button>
+                </div>
+                <div id="create-error" class="error-message hidden"></div>
+                <div id="create-success" class="success-message hidden"></div>
+            </form>
+        </section>
+    </div>
+
+    <!-- Modal for Area Configuration -->
+    <div id="area-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>設定區域動作</h3>
+            <div class="form-group">
+                <label>動作類型 *</label>
+                <div class="action-type-radio">
+                    <label class="radio-option-inline">
+                        <input type="radio" name="area-action-type" value="message" checked>
+                        <span>訊息 (Message)</span>
+                    </label>
+                    <label class="radio-option-inline">
+                        <input type="radio" name="area-action-type" value="richmenuswitch">
+                        <span>切換子頁面 (Rich Menu Switch)</span>
+                    </label>
+                    <label class="radio-option-inline">
+                        <input type="radio" name="area-action-type" value="uri">
+                        <span>開啟網址 (URI)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Message Action Fields -->
+            <div id="message-action-fields">
+                <div class="form-group">
+                    <label for="action-text">訊息文字 (Text) *</label>
+                    <input type="text" id="action-text" placeholder="例如: 是">
+                </div>
+            </div>
+
+            <!-- Rich Menu Switch Action Fields -->
+            <div id="richmenuswitch-action-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="action-alias-id">別名 ID *</label>
+                    <p class="form-hint">輸入要切換到的子頁面別名 (例如: left, middle, right, 或自訂名稱)</p>
+                    <input type="text" id="action-alias-id" placeholder="例如: my-custom-menu">
+                </div>
+            </div>
+
+            <!-- URI Action Fields -->
+            <div id="uri-action-fields" style="display: none;">
+                <div class="form-group">
+                    <label for="action-uri">網址 (URI) *</label>
+                    <p class="form-hint">支援 http://, https://, 或 tel: 開頭的網址</p>
+                    <input type="text" id="action-uri" placeholder="例如: https://example.com">
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="cancel-area" class="btn-secondary">取消</button>
+                <button id="save-area" class="btn-primary">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Create/Edit Alias -->
+    <div id="alias-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="alias-modal-title">建立子頁面</h3>
+            <form id="alias-modal-form">
+                <div class="form-group">
+                    <label for="modal-alias-id">別名 ID *</label>
+                    <input type="text" id="modal-alias-id" placeholder="例如: left, my-custom-menu" required>
+                </div>
+                <div class="form-group">
+                    <label for="modal-richmenu-select">選擇 Rich Menu *</label>
+                    <select id="modal-richmenu-select" required>
+                        <option value="">-- 請先建立 Rich Menu --</option>
+                    </select>
+                </div>
+                <div id="alias-modal-error" class="error-message hidden"></div>
+                <div class="modal-actions">
+                    <button type="button" id="cancel-alias-modal" class="btn-secondary">取消</button>
+                    <button type="submit" id="save-alias-modal" class="btn-primary">儲存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for Curl Commands Display -->
+    <div id="curl-modal" class="modal hidden">
+        <div class="modal-content curl-modal-content">
+            <div class="curl-modal-header">
+                <h3>Curl 指令</h3>
+                <button id="close-curl-modal" class="btn-close">&times;</button>
+            </div>
+            <div class="sponsor-message">
+                <p>提供免費的 curl 指令範例，讓技術使用者可以自行整合。</p>
+                <p>若您希望更簡化的操作方式（如 Web 介面或一鍵設定），<br>
+                歡迎贊助支持，我會提供更完整的整合服務。</p>
+                <p>請寄信: <a href="mailto:u9653022@gmail.com">u9653022@gmail.com</a></p>
+            </div>
+            <p class="form-hint">請依照順序執行以下 curl 指令。<br>
+            Token 請替換 <code>{channel access token}</code> 為您的實際 Channel Access Token。</p>
+            <div id="curl-commands-container" class="curl-commands-container">
+                <!-- Curl commands will be inserted here -->
+            </div>
+            <div class="modal-actions">
+                <button id="copy-all-curl" class="btn-primary">複製全部指令</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="imageHandler.js"></script>
+    <script src="areaSelector.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
